@@ -42,7 +42,7 @@ button, input, select { font: inherit; color: inherit; }
 .orb.a { width: 280px; height: 280px; background: #1f6f62; left: -40px; top: 20%; }
 .orb.b { width: 220px; height: 220px; background: #8a5a2a; right: -20px; top: 40%; }
 
-.shell { max-width: 1120px; margin: 0 auto; padding: 22px 20px 64px; }
+.shell { max-width: 1120px; margin: 0 auto; padding: calc(22px + env(safe-area-inset-top)) 20px calc(64px + env(safe-area-inset-bottom)); }
 .nav {
   display: flex;
   align-items: center;
@@ -254,12 +254,13 @@ button, input, select { font: inherit; color: inherit; }
   padding: 12px 14px;
   margin-bottom: 16px;
 }
-.form { display: grid; gap: 10px; max-width: 420px; }
+.form { display: grid; gap: 10px; max-width: 420px; width: 100%; }
 .form input, .row select {
   background: rgba(7, 16, 22, 0.65);
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 12px;
+  font-size: 16px;
 }
 .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
 .split { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 16px; }
@@ -268,6 +269,9 @@ button, input, select { font: inherit; color: inherit; }
 
 @media (max-width: 800px) {
   .detail-top, .split, .stats { grid-template-columns: 1fr 1fr; }
-  .nav { flex-wrap: wrap; }
+  .nav { flex-wrap: nowrap; overflow-x: auto; gap: 12px; padding-bottom: 6px; }
+  .nav a, .ghost { white-space: nowrap; }
+  .hero h1 { font-size: 2.5rem; }
   .stat-wide { grid-column: 1 / -1; }
+  .card:hover { transform: none; }
 }

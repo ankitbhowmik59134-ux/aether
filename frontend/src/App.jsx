@@ -15,6 +15,21 @@ import {
 import { api, getToken, setToken } from "./api";
 import { AqiRing, Background, CountUp, MiniMeter, colorFor, fadeUp, freshness } from "./components";
 
+async function shareApp() {
+  const url = window.location.origin;
+  const payload = { title: "Aether", text: "Check live air quality for Indian cities.", url };
+  if (navigator.share) {
+    try {
+      await navigator.share(payload);
+      return;
+    } catch {
+      return;
+    }
+  }
+  await navigator.clipboard.writeText(url);
+  window.alert("Link copied. Send it to anyone — they sign in with their own email.");
+}
+
 function Layout({ user, onLogout }) {
   return (
     <>
@@ -26,6 +41,7 @@ function Layout({ user, onLogout }) {
           <NavLink to="/compare">Compare</NavLink>
           <NavLink to="/sources">Sources</NavLink>
           {user ? <NavLink to="/watchlist">Watchlist</NavLink> : null}
+          <button className="ghost" type="button" onClick={shareApp}>Share</button>
           {user ? (
             <button className="ghost" onClick={onLogout}>Log out</button>
           ) : (
@@ -54,8 +70,8 @@ function AnimatedRoutes({ user }) {
           <Route path="/cities/:id" element={<City user={user} />} />
           <Route path="/compare" element={<Compare />} />
           <Route path="/sources" element={<Sources />} />
-          <Route path="/login" element={<Auth mode="login" />} />
-          <Route path="/register" element={<Auth mode="register" />} />
+          <Route path="/login" element={<Auth />} />
+          <Route path="/register" element={<Auth />} />
           <Route path="/watchlist" element={<Watchlist user={user} />} />
         </Routes>
       </motion.div>
@@ -511,19 +527,18 @@ function Sources() {
   );
 }
 
-function Auth({ mode }) {
-  const navigate = useNavigate();
-  const [email, setEmail] = useState(mode === "login" ? "analyst@aether.dev" : "");
-  const [password, setPassword] = useState(mode === "login" ? "Analyst@123" : "");
+function Auth() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
   async function submit(event) {
     event.preventDefault();
     setError("");
     try {
-      const data = await api(`/api/auth/${mode === "login" ? "login" : "register"}`, {
+      const data = await api("/api/auth/access", {
         method: "POST",
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
       });
       setToken(data.access_token);
       window.location.href = "/";
@@ -534,16 +549,13 @@ function Auth({ mode }) {
 
   return (
     <form className="form card" onSubmit={submit}>
-      <h1>{mode === "login" ? "Log in" : "Create an account"}</h1>
-      <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Email" required />
-      <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Password" required />
+      <h1>Sign in with your email</h1>
+      <p className="note">Any email works. The first time creates your account and watchlist. Come back with the same email and password.</p>
+      <input type="email" inputMode="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@email.com" required />
+      <input type="password" autoComplete="current-password" minLength={8} value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Password, at least 8 characters" required />
       {error ? <div className="error">{error}</div> : null}
-      <button className="solid" type="submit">{mode === "login" ? "Enter" : "Register"}</button>
-      {mode === "login" ? (
-        <p className="note">Demo: analyst@aether.dev / Analyst@123. Delhi is already watched at AQI 200. <Link to="/register">Register</Link></p>
-      ) : (
-        <p className="note">Password needs at least 8 characters. <Link to="/login">Log in</Link></p>
-      )}
+      <button className="solid" type="submit">Continue</button>
+      <p className="note">On a phone, use the browser menu and choose Add to Home Screen. Then share this link with friends so each person signs in with their own email.</p>
     </form>
   );
 }
