@@ -49,7 +49,7 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5173
+Open https://aether-o9du.onrender.com/
 
 Demo login, also printed on the login screen:
 
